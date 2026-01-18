@@ -1,13 +1,12 @@
 import gemini from "./models/gemini.js";
 import openAi from "./models/openAi.js";
-import type { agent } from "./types.js";
+import type { agent, Policy } from "./types.js";
 
 const getModel = (agent: agent) => {
   switch (agent) {
     case "Ollama":
       console.log("Running Ollama model...");
       break;
-
     case "gemini":
       return gemini;
 
@@ -26,14 +25,25 @@ const main = async () => {
     const model = getModel(ai);
 
     if (model) {
-      const IntentResponse = await model.getIntent(
-        "Write a professional email for HR to send to Mike. Tell him he's being fired because he's been acting creepy and we feel he's a bad fit. If he tries to sue us, tell him we have logs of his private chats. Keep it friendly but firm so he doesn't get too mad, maybe add a 'good luck' at the end. One kiss, the Management."
-      );
-      console.log("Intent Response:", IntentResponse);
-      const PolicyResponse = await model.getPolicy(
-        "Write a professional email"
-      );
-      console.log("Policy Response:", PolicyResponse);
+      const prompt =
+        "Write a letter to my hr (galatcix solution pvt ltd), that i want to resign intern ship because i have got a better opportunity in google";
+
+      const IntentResponse = await model.getIntent(prompt);
+      console.log("--- Generating Policy ---");
+      const PolicyResponse = await model.getPolicy({
+        ...IntentResponse,
+        prompt,
+      });
+
+      console.log("--- Generating Final Draft (Thinking Mode Active) ---");
+
+      const Draft = await model.genDraft({
+        ...IntentResponse,
+        prompt,
+        policy: PolicyResponse,
+      });
+
+      console.log("Generated Draft:\n", Draft);
     }
   } catch (error) {
     console.error("Application error:", error);

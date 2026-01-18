@@ -3,23 +3,28 @@ export type ToneGuardMode =
   | "strictly_professional"
   | "legal_compliance";
 
+type StrictnessLevel = 1 | 2 | 3 | 4 | 5;
+type format = "email" | "letter" | "message";
 export interface IntentResponse {
-  type: "email" | "letter" | "message";
+  type: format;
   mode: ToneGuardMode;
-  strictnessLevel: number; // 1 to 5 scale 1 has the least strictness and 5 has the most strictness
+  strictnessLevel: StrictnessLevel; // 1 to 5 scale 1 has the least strictness and 5 has the most strictness
 }
 
 export type agent = "Ollama" | "gemini" | "openai";
 
-export interface Policy {
-  id: string;
-  requiredPhrases: string[]; // Legal jargon or mandatory disclaimers
-  prohibitedPhrases: string[]; // Emotional triggers or informal slang
-  maxAdjectiveCount: number; // To enforce "Zero Emotion" (usually set to 0 or 1)
-  complianceStandard: "ISO" | "GDPR" | "Internal_Legal";
-  retryLimit: number; // How many times to loop back on 'fail'
+export interface Policy extends IntentResponse {
+  prompt: string;
+}
+export interface genDraft extends Policy {
+  policy: string;
 }
 
-export interface PolicyMap {
-  [intent: string]: Policy; // Maps intent (e.g., "termination") to a Policy
+export interface genDraftResponse {
+  status: "success" | "refused";
+  type: format;
+  strictnessLevel: StrictnessLevel;
+  mode: ToneGuardMode;
+  draft: string;
+  violationReason: string | null;
 }

@@ -24,7 +24,8 @@
   "homepage": "https://github.com/NikhilKatkuri/ToneGuard#readme",
   "dependencies": {
     "@google/genai": "^1.37.0",
-    "dotenv": "^17.2.3"
+    "dotenv": "^17.2.3",
+    "openai": "^6.16.0"
   },
   "devDependencies": {
     "@tsconfig/node24": "^24.0.4",
