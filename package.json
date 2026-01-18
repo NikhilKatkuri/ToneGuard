@@ -2,9 +2,12 @@
   "name": "toneguard",
   "version": "1.0.0",
   "description": "A rule-driven AI system for generating professional emails, letters, and messages with strict communication constraints",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "dev": "node index.js",
+    "dev": "tsx src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "type-check": "tsc --noEmit",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -22,5 +25,11 @@
   "dependencies": {
     "@google/genai": "^1.37.0",
     "dotenv": "^17.2.3"
+  },
+  "devDependencies": {
+    "@tsconfig/node24": "^24.0.4",
+    "@types/node": "^25.0.9",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
   }
 }
