@@ -63,7 +63,7 @@ class openAi {
           },
           {
             role: "user",
-            content: { ...param }.toString(),
+            content: JSON.stringify(param),
           },
         ],
         response_format: { type: "json_object" },
@@ -91,7 +91,7 @@ class openAi {
           },
           {
             role: "user",
-            content: { ...param }.toString(),
+            content: JSON.stringify(param),
           },
         ],
         response_format: { type: "json_object" },

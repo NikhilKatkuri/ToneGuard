@@ -9,6 +9,7 @@ export interface IntentResponse {
   type: format;
   mode: ToneGuardMode;
   strictnessLevel: StrictnessLevel; // 1 to 5 scale 1 has the least strictness and 5 has the most strictness
+  recipientContext: "office" | "hr" | "college" | "friend" | "family" | null;
 }
 
 export type agent = "Ollama" | "gemini" | "openai";

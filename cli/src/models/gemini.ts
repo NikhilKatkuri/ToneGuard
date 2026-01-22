@@ -45,7 +45,7 @@ class gemini {
     try {
       const res = await this._AI.models.generateContent({
         model: this.model,
-        contents: { ...param }.toString(),
+        contents: JSON.stringify(param),
         config: {
           systemInstruction: PolicyInstruction,
           responseMimeType: "application/json",
@@ -64,7 +64,7 @@ class gemini {
     try {
       const res = await this._AI.models.generateContent({
         model: this.model,
-        contents: { ...param }.toString(),
+        contents: JSON.stringify(param),
         config: {
           systemInstruction: GenDraftInstruction,
           responseMimeType: "application/json",
