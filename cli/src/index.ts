@@ -1,176 +1,80 @@
-import gemini from "./models/gemini.js";
-import openAi from "./models/openAi.js";
 import OllamaModel from "./models/ollama.js";
-import type { agent, Policy } from "./types.js";
+import { performance } from "perf_hooks";
 
-const getModel = (agent: agent) => {
-  switch (agent) {
-    case "Ollama":
-      return OllamaModel;
-    case "gemini":
-      return gemini;
-    case "openai":
-      return openAi;
-    default:
-      throw new Error("Unsupported agent");
-  }
-};
-
-const validateDraft = (
-  draft: string,
-  strictness: number
-): { isValid: boolean; issues: string[] } => {
+const validateDraft = (draft: string, strictness: number) => {
   const issues: string[] = [];
-
-  // 1. Emotional Keywords Check (Cumulative for Level 3 and above)
   if (strictness >= 3) {
-    const forbidden = [
-      /thank/i,
-      /appreciate/i,
-      /hope/i,
-      /feel/i,
-      /sorry/i,
-      /regret/i,
-      /wish/i,
-      /pleas(ed|ure)/i, // Added "pleased" or "pleasure"
-    ];
-
-    forbidden.forEach((regex) => {
-      if (regex.test(draft)) {
-        issues.push(`Forbidden emotional term detected: "${regex.source}"`);
-      }
+    const forbidden = [/thank/i, /appreciate/i, /hope/i, /feel/i, /sorry/i];
+    forbidden.forEach((r) => {
+      if (r.test(draft)) issues.push(`Forbidden: "${r.source}"`);
     });
   }
-
-  // 2. Formatting & Adjective Check (For Level 5)
   if (strictness === 5) {
-    const subjectiveAdverbs = [
-      /extremely/i,
-      /very/i,
-      /kindly/i,
-      /fortunately/i,
-      /unfortunately/i,
-    ];
-    subjectiveAdverbs.forEach((regex) => {
-      if (regex.test(draft)) {
-        issues.push(
-          `Level 5 Violation: Subjective adverb detected: "${regex.source}"`
-        );
-      }
+    const adverbs = [/extremely/i, /very/i, /kindly/i, /unfortunately/i];
+    adverbs.forEach((r) => {
+      if (r.test(draft)) issues.push(`Level 5 Violation: "${r.source}"`);
     });
   }
-
-  // 3. Placeholder Logic
-  // Matches [Text] but NOT [[Text]]. Uses negative lookbehind and lookahead.
-  const genericPlaceholderRegex = /(?<!\[)\[(?!\[).+?\](?!\])/g;
-
-  if (genericPlaceholderRegex.test(draft)) {
-    issues.push(
-      "Improper placeholder format. Use [[VARIABLE_NAME]] instead of [Name]."
-    );
-  }
-
-  return {
-    isValid: issues.length === 0,
-    issues,
-  };
+  return { isValid: issues.length === 0, issues };
 };
 
 const main = async () => {
+  const pipelineStart = performance.now();
+  const prompt =
+    process.argv.slice(2).join(" ") ||
+    "Draft a formal termination for John Doe due to policy violations.";
+
   try {
-    // Parse command line arguments
-    const args = process.argv.slice(2);
-    let agentName: agent = "Ollama"; // Default
-    let promptParts: string[] = [];
+    console.log(`\n[ToneGuard 2026] Target: <30s Latency`);
 
-    for (let i = 0; i < args.length; i++) {
-      if (args[i] === "--agent" && i + 1 < args.length) {
-        const val = args[i + 1].toLowerCase();
-        if (val === "ollama") agentName = "Ollama";
-        else if (val === "gemini") agentName = "gemini";
-        else if (val === "openai") agentName = "openai";
-        i++; // Skip next arg
-      } else {
-        promptParts.push(args[i]);
-      }
-    }
+    // STEP 1: INTENT
+    const t1 = performance.now();
+    const intent = await OllamaModel.getIntent(prompt);
+    console.log(
+      `Step 1: Intent Detected (${((performance.now() - t1) / 1000).toFixed(2)}s)`,
+    );
 
-    const prompt = promptParts.length > 0
-      ? promptParts.join(" ")
-      : "Draft a formal email to an employee, John Doe, terminating his employment effective immediately due to repeated policy violations despite warnings.";
+    // STEP 2: POLICY
+    const t2 = performance.now();
+    const policy = await OllamaModel.getPolicy({ ...intent, prompt });
+    console.log(
+      `Step 2: Policy Built (${((performance.now() - t2) / 1000).toFixed(2)}s)`,
+    );
 
-    console.log(`\nUsing Agent: ${agentName}`);
-    console.log(`Prompt: "${prompt}"\n`);
+    // STEP 3: DRAFTING & VALIDATION LOOP
+    let attempts = 0;
+    let isValid = false;
+    let finalDraft = "";
 
-    console.time("Total Execution Time");
-    const model = getModel(agentName);
+    while (!isValid && attempts < 3) {
+      attempts++;
+      const t3 = performance.now();
+      const res = await OllamaModel.genDraft({ ...intent, prompt, policy });
+      finalDraft = res.draft;
 
-    if (model) {
-      console.log("--- Analyzing Intent ---");
-      const IntentResponse = await model.getIntent(prompt);
-      console.log(`Intent Detected: Type=${IntentResponse.type}, Mode=${IntentResponse.mode}, Level=${IntentResponse.strictnessLevel}`);
-
-      console.log("\n--- Generating Policy ---");
-      const PolicyResponse = await model.getPolicy({
-        ...IntentResponse,
-        prompt,
-      });
-      console.log("Policy Generated.");
-
-      console.log("\n--- Generating Final Draft (Thinking Mode Active) ---");
-
-      let Draft = await model.genDraft({
-        ...IntentResponse,
-        prompt,
-        policy: PolicyResponse,
-      });
-
-      console.log("Generated Draft:\n", Draft.draft);
-      let finalOutput = Draft.draft;
-
-      console.log("\n--- Validating Draft ---");
-      let validation = validateDraft(finalOutput, Draft.strictnessLevel);
-
-      let attempts = 0;
-      const maxAttempts = 3;
-
-      while (!validation.isValid && attempts < maxAttempts) {
-        attempts++;
-        console.log(`\nValidation Failed (Attempt ${attempts}/${maxAttempts}). Issues:`);
-        validation.issues.forEach((issue) => console.log("- " + issue));
-
-        const correctionPrompt = `
-    The previous draft FAILED validation for Strictness Level ${Draft.strictnessLevel}.
-    ISSUES: ${validation.issues.join(", ")}
-    ACTION: Fix these specific issues. Remove banned words. Strictly follow the policy.
-    Rewrite the draft.
-  `;
-        console.log("Regenerating with feedback...");
-
-        Draft = await model.genDraft({
-          ...IntentResponse,
-          prompt: prompt + "   " + correctionPrompt,
-          policy: PolicyResponse,
-        });
-
-        finalOutput = Draft.draft;
-        console.log("New Draft Candidate:\n", finalOutput);
-        validation = validateDraft(finalOutput, Draft.strictnessLevel);
-      }
+      const validation = validateDraft(finalDraft, intent.strictnessLevel);
+      console.log(
+        `Step 3: Draft Attempt ${attempts} (${((performance.now() - t3) / 1000).toFixed(2)}s)`,
+      );
 
       if (validation.isValid) {
-        console.log("\n\nSUCCESS: Draft matches all strictness criteria.");
-        console.log("Final Output:\n--------------------------------------------------\n", finalOutput, "\n--------------------------------------------------");
+        isValid = true;
       } else {
-        console.log("\n\nFAILURE: Draft failed validation after max attempts.");
-        console.log("Last Output:\n", finalOutput);
+        console.warn(`Validation failed: ${validation.issues.join(", ")}`);
+        // Feed the failure back into the prompt for the next loop
+        intent.prompt = `${prompt} [CORRECTION: Remove ${validation.issues.join(", ")}]`;
       }
     }
-    console.timeEnd("Total Execution Time");
+
+    const totalTime = ((performance.now() - pipelineStart) / 1000).toFixed(2);
+    console.log(`\n--------------------------------------------------`);
+    console.log(isValid ? "SUCCESS" : "FAILED (MAX ATTEMPTS)");
+    console.log(`TOTAL TIME: ${totalTime}s`);
+    console.log(`DRAFT:\n${finalDraft}`);
+    console.log(`--------------------------------------------------`);
   } catch (error) {
-    console.error("Application error:", error);
-    process.exit(1);
+    console.error("Critical Failure:", error);
   }
 };
 
-await main();
+main();

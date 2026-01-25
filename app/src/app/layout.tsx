@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { SideBarProvider } from "@/providers/Sidebar";
 import { DialogProvider } from "@/providers/Dialog";
+import { SuperProvider } from "@/providers/Super";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -54,9 +55,11 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body className={`${geistSans.variable} ${geistMono.variable} h-screen antialiased`}>
-                <DialogProvider>
-                    <SideBarProvider>{children}</SideBarProvider>
-                </DialogProvider>
+                <SuperProvider>
+                    <DialogProvider>
+                        <SideBarProvider>{children}</SideBarProvider>
+                    </DialogProvider>
+                </SuperProvider>
             </body>
         </html>
     );

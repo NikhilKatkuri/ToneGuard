@@ -6,6 +6,7 @@ export type ToneGuardMode =
 type StrictnessLevel = 1 | 2 | 3 | 4 | 5;
 type format = "email" | "letter" | "message";
 export interface IntentResponse {
+  prompt: string;
   type: format;
   mode: ToneGuardMode;
   strictnessLevel: StrictnessLevel; // 1 to 5 scale 1 has the least strictness and 5 has the most strictness
