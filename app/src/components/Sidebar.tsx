@@ -3,6 +3,7 @@
 import cn from "@/lib/utlis";
 import { forwardRef } from "react";
 import SidebarTrigger from "./sidebar_trigger";
+import { useDialog } from "@/providers/Dialog";
 
 type SidebarProps = React.HTMLAttributes<HTMLDivElement> & {
     isCollapsed?: boolean;
@@ -10,6 +11,7 @@ type SidebarProps = React.HTMLAttributes<HTMLDivElement> & {
 
 const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(
     ({ className, isCollapsed = false, ...props }, ref) => {
+        const { setting, history } = useDialog();
         const dcn =
             "duration-200 bg-secondary-background font-sans h-full box-content transition-[width] duration-200 ease-linear  start-0  border-r border-zinc-200/70";
         return (
@@ -19,15 +21,18 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(
                         <ul className="flex h-auto flex-col">
                             <li
                                 className={cn(
-                                    "group flex max-w-12 items-center rounded-full p-3 text-sm font-medium",
-                                    "cursor-pointer text-zinc-700 hover:bg-zinc-200/50 hover:text-zinc-900",
+                                    "group flex max-w-12 items-center rounded-full p-3 text-sm font-medium max-lg:my-2",
+                                    "cursor-pointer text-zinc-700",
                                     "transition-colors",
-                                    "hover:bg-zinc-200/50 hover:text-zinc-900",
-                                    "active:bg-zinc-200/60 active:text-zinc-900",
                                 )}
                             >
-                                <div className="flex h-6 w-6 shrink-0 items-center justify-center">
-                                    <SidebarTrigger />
+                                <div className="flex items-center gap-4">
+                                    <div className="flex h-6 w-6 shrink-0 items-center justify-center">
+                                        <SidebarTrigger />
+                                    </div>
+                                    <p className="text-lg font-medium text-slate-800 sm:text-xl lg:hidden">
+                                        ToneGuard
+                                    </p>
                                 </div>
                             </li>
                             <li
@@ -80,6 +85,9 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(
                                 </span>
                             </li>
                             <li
+                                onClick={() => {
+                                    history.toggle();
+                                }}
                                 className={cn(
                                     "group flex items-center rounded-full p-3 text-sm font-medium",
                                     "cursor-pointer text-zinc-700",
@@ -129,6 +137,9 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(
                                 </span>
                             </li>
                             <li
+                                onClick={() => {
+                                    history.toggle();
+                                }}
                                 className={cn(
                                     "group flex items-center rounded-full p-3 text-sm font-medium",
                                     "cursor-pointer text-zinc-700",
@@ -210,6 +221,9 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(
                                     "hover:bg-zinc-200/50 hover:text-zinc-900",
                                     "active:bg-zinc-200/60 active:text-zinc-900",
                                 )}
+                                onClick={() => {
+                                    setting.toggle();
+                                }}
                             >
                                 <div className="flex h-6 w-6 shrink-0 items-center justify-center">
                                     <svg

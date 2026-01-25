@@ -7,14 +7,14 @@ type SidebarTriggerProps = React.HTMLAttributes<HTMLButtonElement>;
 const SidebarTrigger = ({ ...props }: SidebarTriggerProps) => {
     const { isOpen, setIsOpen } = useSideBar();
     const dnc =
-        "cursor-pointer rounded-full bg-transparent p-2 transition-colors duration-200 ease-in-out hover:bg-gray-100";
+        "cursor-pointer rounded-full bg-transparent p-2 transition-colors duration-200 ease-in-out hover:bg-gray-200 active:bg-gray-200";
     return (
         <button
-            className={cn(dnc, props.className ?? "")}
             onClick={() => {
                 setIsOpen(!isOpen);
             }}
             {...props}
+            className={cn(dnc, props.className ?? " ")}
         >
             <svg
                 xmlns="http://www.w3.org/2000/svg"

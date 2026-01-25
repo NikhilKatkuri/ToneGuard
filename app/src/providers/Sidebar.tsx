@@ -27,14 +27,14 @@ export const SideBarProvider = ({ children }: { children: ReactNode }) => {
     }, []);
 
     if (!isDesktop) {
-        const dnc = "fixed top-0 left-0 h-full z-50";
+        const dnc = "fixed top-0  h-full z-50";
         return (
             <SideBarContext.Provider value={{ isOpen, setIsOpen, isDesktop }}>
                 <div className="bg-primary-background relative h-svh font-sans">
                     <div
                         className={cn(
                             dnc,
-                            isOpen ? "translate-x-0" : "-translate-x-full",
+                            isOpen ? "left-0" : "-left-125",
                             "transition-width z-50 duration-300",
                         )}
                     >
@@ -45,6 +45,7 @@ export const SideBarProvider = ({ children }: { children: ReactNode }) => {
             </SideBarContext.Provider>
         );
     }
+
     return (
         <SideBarContext.Provider value={{ isOpen, setIsOpen, isDesktop }}>
             <div className="bg-primary-background grid h-svh grid-cols-1 font-sans lg:grid-cols-[auto_1fr]">
