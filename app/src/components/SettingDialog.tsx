@@ -1,15 +1,7 @@
-// api, models, instruction, memory
-
 import { useState } from "react";
 import Instructions from "./settings/Instructions";
 import Api from "./settings/Api";
-
-/**
- * type of apis - provider:gemini, openai, ollama url -modelname:string, key: api key,
- * type of models - model list from apis
- * instruction - custom instructions for the model
- * memory - conversation memory settings
- */
+import cn from "@/lib/utlis";
 
 type opts = "API" | "Instruction" | "Memory";
 
@@ -86,11 +78,37 @@ const SettingDialog = () => {
     return (
         <div
             onClick={(e) => e.stopPropagation()}
-            className="mx-auto min-h-120 w-full rounded-t-3xl bg-white p-4 py-6 max-md:pt-12 md:max-w-4xl md:rounded-3xl lg:p-6"
+            className="mx-auto h-auto w-full rounded-t-3xl bg-white p-4 py-6 max-md:pt-12 md:h-140 md:rounded-3xl lg:max-w-4xl lg:p-6"
         >
-            <p className="text-lg font-medium">Settings</p>
-            <div className="mt-4 flex h-full w-full flex-1 grid-cols-1 md:grid md:grid-cols-[220px_auto] md:gap-6">
-                <div className="flex w-full flex-col gap-2">
+            <div className="flex items-center gap-2">
+                {selectedOpt && (
+                    <button
+                        onClick={() => setSelectedOpt(undefined)}
+                        className="cursor-pointer rounded-full p-2 hover:bg-gray-200/70 active:bg-gray-200/70 md:hidden"
+                    >
+                        {" "}
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth={2}
+                            stroke="currentColor"
+                            className="size-5"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M15.75 19.5 8.25 12l7.5-7.5"
+                            />
+                        </svg>
+                    </button>
+                )}
+                <p className="text-lg font-medium">Settings</p>
+            </div>
+            <div className="relative mt-4 flex h-full w-full flex-1 md:grid md:grid-cols-[220px_auto] md:gap-6">
+                <div
+                    className={cn("flex w-full flex-col gap-2", selectedOpt ? "max-md:hidden" : "")}
+                >
                     {Object.entries(opts).map(([key, { name, Icon }]) => (
                         <div
                             key={key}
@@ -104,7 +122,15 @@ const SettingDialog = () => {
                         </div>
                     ))}
                 </div>
-                <div className="hidden flex-1 flex-col gap-4 md:flex">{getTab(selectedOpt)}</div>
+
+                <div
+                    className={cn(
+                        "flex-1 flex-col gap-4 md:flex",
+                        selectedOpt !== undefined ? "max-md:flex max-md:flex-1" : "max-md:hidden",
+                    )}
+                >
+                    {getTab(selectedOpt)}
+                </div>
             </div>
         </div>
     );

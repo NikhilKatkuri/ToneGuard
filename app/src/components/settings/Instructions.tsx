@@ -87,8 +87,8 @@ const Instructions = () => {
     const [chosenInstruction, setChosenInstruction] = useState<Instructions>(INSTRUCTIONS[0]);
 
     return (
-        <div className="h-full max-h-96 w-full overflow-y-scroll pr-3">
-            <div className="grid h-120 w-full grid-cols-1 grid-rows-[24px_auto_auto] gap-3">
+        <div className="h-full max-h-140 w-full overflow-y-auto pr-3">
+            <div className="grid min-h-120 w-full grid-cols-1 grid-rows-[24px_auto_auto] gap-3">
                 <h1 className="font-medium">Customize Toneguard&apos;s Response</h1>
                 <div className="mt-3 grid h-full w-full grid-cols-2 gap-3">
                     {INSTRUCTIONS.map((instruction) => (
