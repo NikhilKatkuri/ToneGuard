@@ -1,4 +1,3 @@
- 
 const HistoryDialog = () => {
     return <div>HistoryDialog</div>;
 };
