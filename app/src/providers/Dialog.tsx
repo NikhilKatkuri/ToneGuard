@@ -17,7 +17,7 @@ const DialogContext = createContext<DialogContextType | undefined>(undefined);
 export const DialogProvider = ({ children }: { children: ReactNode }) => {
     const dialogs: Record<DialogKey, { control: UseDialogReturn; children: ReactNode }> = {
         setting: {
-            control: useDialogHook({ defaultOpen: false }),
+            control: useDialogHook({ defaultOpen: true }),
             children: <SettingDialog />,
         },
         history: {
