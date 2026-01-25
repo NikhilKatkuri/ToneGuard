@@ -20,7 +20,7 @@
 @media (prefers-color-scheme: dark) {
     :root {
         --primary-background: var(--color-black);
-        --secondary-background: #111;
+        --secondary-background: #111111;
         --primary-foreground: #ededed;
         --secondary-foreground: #525252;
     }
@@ -30,4 +30,16 @@ body {
     background: var(--primary-background);
     color: var(--primary-foreground);
     font-family: var(--font-geist-sans);
+}
+
+textarea::-webkit-scrollbar {
+    width: 4px;
+    background: #ededed;
+    border-radius: 4px;
+    overflow: hidden;
+}
+textarea::-webkit-scrollbar-thumb {
+    width: 4px;
+    background: #c0c0c0;
+    border-radius: 4px;
 }
